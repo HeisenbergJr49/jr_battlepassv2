@@ -342,6 +342,173 @@ AddEventHandler('jr_battlepass:claimReward', function(rewardType, level)
     end
 end)
 
+-- Handle mission update
+RegisterNetEvent('jr_battlepass:updateMission')
+AddEventHandler('jr_battlepass:updateMission', function(missionId, progress)
+    local playerId = source
+    local xPlayer = ESX.GetPlayerFromId(playerId)
+    if not xPlayer then return end
+    
+    if IsRateLimited(playerId) then
+        return
+    end
+    
+    local identifier = xPlayer.getIdentifier()
+    local missionType = 'daily'
+    local expiresAt = os.date('%Y-%m-%d 23:59:59')
+    
+    -- Check if it's a weekly mission
+    local weeklyMissions = {'races', 'jobs', 'farming', 'combat'}
+    for _, weeklyId in pairs(weeklyMissions) do
+        if missionId == weeklyId then
+            missionType = 'weekly'
+            -- Calculate next Sunday
+            local currentTime = os.time()
+            local nextSunday = currentTime + (7 - os.date('*t', currentTime).wday) * 86400
+            expiresAt = os.date('%Y-%m-%d 23:59:59', nextSunday)
+            break
+        end
+    end
+    
+    -- Update mission progress
+    UpdateMissionProgress(identifier, missionId, progress, missionType, expiresAt, function(success)
+        if success then
+            -- Check if mission is completed
+            local missionData = nil
+            local missions = missionType == 'daily' and Config.DailyMissions or Config.WeeklyMissions
+            
+            for _, mission in pairs(missions) do
+                if mission.id == missionId then
+                    missionData = mission
+                    break
+                end
+            end
+            
+            if missionData and progress >= missionData.target then
+                -- Mission completed!
+                CompleteMission(identifier, missionId, function(completed)
+                    if completed then
+                        -- Give rewards
+                        local reward = missionData.reward
+                        if reward.xp then
+                            GivePlayerXP(playerId, reward.xp, 'Mission: ' .. missionData.label)
+                        end
+                        if reward.money then
+                            xPlayer.addMoney(reward.money)
+                        end
+                        if reward.items then
+                            for _, item in pairs(reward.items) do
+                                if xPlayer.canCarryItem(item.item, item.amount) then
+                                    xPlayer.addInventoryItem(item.item, item.amount)
+                                end
+                            end
+                        end
+                        
+                        -- Notify client
+                        TriggerClientEvent('jr_battlepass:missionCompleted', playerId, missionData, reward)
+                        
+                        -- Log reward
+                        LogReward(playerId, 'mission', missionData)
+                    end
+                end)
+            end
+            
+            -- Send updated missions to client
+            GetPlayerMissions(identifier, function(missions)
+                TriggerClientEvent('jr_battlepass:missionUpdate', playerId, missions)
+            end)
+        end
+    end)
+end)
+
+-- Request missions
+RegisterNetEvent('jr_battlepass:requestMissions')
+AddEventHandler('jr_battlepass:requestMissions', function()
+    local playerId = source
+    local xPlayer = ESX.GetPlayerFromId(playerId)
+    if not xPlayer then return end
+    
+    local identifier = xPlayer.getIdentifier()
+    
+    GetPlayerMissions(identifier, function(missions)
+        -- Format missions for client
+        local formattedMissions = {
+            daily = {},
+            weekly = {}
+        }
+        
+        -- Add configured missions that don't exist yet
+        for _, mission in pairs(Config.DailyMissions) do
+            local found = false
+            for _, playerMission in pairs(missions) do
+                if playerMission.mission_id == mission.id and playerMission.mission_type == 'daily' then
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                -- Create new mission
+                local expiresAt = os.date('%Y-%m-%d 23:59:59')
+                UpdateMissionProgress(identifier, mission.id, 0, 'daily', expiresAt)
+            end
+        end
+        
+        for _, mission in pairs(Config.WeeklyMissions) do
+            local found = false
+            for _, playerMission in pairs(missions) do
+                if playerMission.mission_id == mission.id and playerMission.mission_type == 'weekly' then
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                -- Create new mission
+                local currentTime = os.time()
+                local nextSunday = currentTime + (7 - os.date('*t', currentTime).wday) * 86400
+                local expiresAt = os.date('%Y-%m-%d 23:59:59', nextSunday)
+                UpdateMissionProgress(identifier, mission.id, 0, 'weekly', expiresAt)
+            end
+        end
+        
+        -- Get updated missions
+        GetPlayerMissions(identifier, function(updatedMissions)
+            for _, playerMission in pairs(updatedMissions) do
+                local missionConfig = nil
+                local missions = playerMission.mission_type == 'daily' and Config.DailyMissions or Config.WeeklyMissions
+                
+                for _, mission in pairs(missions) do
+                    if mission.id == playerMission.mission_id then
+                        missionConfig = mission
+                        break
+                    end
+                end
+                
+                if missionConfig then
+                    local missionData = {
+                        id = playerMission.mission_id,
+                        label = missionConfig.label,
+                        description = missionConfig.description,
+                        target = missionConfig.target,
+                        reward = missionConfig.reward,
+                        progress = playerMission.progress,
+                        completed = playerMission.completed,
+                        claimed = playerMission.claimed,
+                        expires_at = playerMission.expires_at
+                    }
+                    
+                    if playerMission.mission_type == 'daily' then
+                        table.insert(formattedMissions.daily, missionData)
+                    else
+                        table.insert(formattedMissions.weekly, missionData)
+                    end
+                end
+            end
+            
+            TriggerClientEvent('jr_battlepass:receiveMissions', playerId, formattedMissions)
+        end)
+    end)
+end)
+
 -- Export functions
 exports('givePlayerXP', GivePlayerXP)
 exports('getPlayerBattlepassData', function(playerId)
