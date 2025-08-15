@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JR.DEV Battlepass</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="battlepassContainer" class="battlepass-container hidden">
+        <!-- Header -->
+        <header class="battlepass-header">
+            <div class="header-left">
+                <h1 class="battlepass-title">
+                    <span class="title-main">JR.DEV</span>
+                    <span class="title-sub">Battlepass</span>
+                </h1>
+                <div class="season-info">
+                    <span class="season-text">Season 1</span>
+                    <span class="season-time">42 Tage übrig</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="player-level">
+                    <div class="level-badge">
+                        <span class="level-number">25</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-fill"></div>
+                        <span class="xp-text">2,450 / 3,000 XP</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="currency-display">
+                    <div class="coins">
+                        <img src="assets/images/coin.png" alt="Coins" class="currency-icon">
+                        <span class="currency-amount">1,250</span>
+                    </div>
+                    <div class="premium-status">
+                        <div class="premium-badge premium-active">
+                            <span>PREMIUM</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="close-button" id="closeButton">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="battlepass-nav">
+            <button class="nav-button active" data-tab="battlepass">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polygon points="12 2 15.09 8.26 22 9 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9 8.91 8.26 12 2"></polygon>
+                </svg>
+                <span class="nav-text">Battlepass</span>
+            </button>
+            <button class="nav-button" data-tab="daily">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span class="nav-text">Tägliche Belohnungen</span>
+            </button>
+            <button class="nav-button" data-tab="missions">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14,2 14,8 20,8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10,9 9,9 8,9"></polyline>
+                </svg>
+                <span class="nav-text">Missionen</span>
+            </button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="battlepass-content">
+            <!-- Battlepass Tab -->
+            <section id="battlepassTab" class="content-tab active">
+                <div class="battlepass-grid">
+                    <div class="pass-column free-pass">
+                        <div class="pass-header">
+                            <h3 class="pass-title">Kostenloser Pass</h3>
+                            <p class="pass-description">Verfügbar für alle Spieler</p>
+                        </div>
+                        <div class="rewards-track" id="freeTrack">
+                            <!-- Rewards will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="pass-column premium-pass">
+                        <div class="pass-header">
+                            <h3 class="pass-title">Premium Pass</h3>
+                            <p class="pass-description">Erweiterte Belohnungen</p>
+                            <button class="buy-premium-btn" id="buyPremiumBtn">
+                                Premium kaufen (1,500 Coins)
+                            </button>
+                        </div>
+                        <div class="rewards-track" id="premiumTrack">
+                            <!-- Rewards will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Daily Rewards Tab -->
+            <section id="dailyTab" class="content-tab">
+                <div class="daily-rewards-container">
+                    <div class="daily-header">
+                        <h2 class="daily-title">Tägliche Belohnungen</h2>
+                        <div class="streak-info">
+                            <span class="streak-label">Aktuelle Serie:</span>
+                            <span class="streak-counter">3 Tage</span>
+                        </div>
+                    </div>
+                    <div class="daily-grid" id="dailyGrid">
+                        <!-- Daily rewards will be populated by JavaScript -->
+                    </div>
+                    <div class="daily-claim-area">
+                        <button class="claim-daily-btn" id="claimDailyBtn">
+                            Tägliche Belohnung einfordern
+                        </button>
+                        <div class="next-reward-timer">
+                            Nächste Belohnung in: <span id="nextRewardTimer">--:--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Missions Tab -->
+            <section id="missionsTab" class="content-tab">
+                <div class="missions-container">
+                    <div class="missions-header">
+                        <h2 class="missions-title">Missionen</h2>
+                        <div class="missions-refresh">
+                            Neue Missionen in: <span id="missionRefreshTimer">--:--:--</span>
+                        </div>
+                    </div>
+                    <div class="missions-content">
+                        <div class="mission-category">
+                            <h3 class="category-title">Tägliche Missionen</h3>
+                            <div class="missions-grid" id="dailyMissionsGrid">
+                                <!-- Daily missions will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="mission-category">
+                            <h3 class="category-title">Wöchentliche Missionen</h3>
+                            <div class="missions-grid" id="weeklyMissionsGrid">
+                                <!-- Weekly missions will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Reward Animation Overlay -->
+    <div id="rewardOverlay" class="reward-overlay hidden">
+        <div class="reward-animation">
+            <div class="reward-icon">
+                <img src="" alt="Reward" id="rewardImage">
+            </div>
+            <div class="reward-text">
+                <h3 id="rewardTitle">Belohnung erhalten!</h3>
+                <p id="rewardDescription">Du hast eine Belohnung erhalten</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- XP Gain Animation -->
+    <div id="xpGainOverlay" class="xp-gain-overlay hidden">
+        <div class="xp-animation">
+            <span class="xp-amount">+500 XP</span>
+            <span class="xp-reason">Mission abgeschlossen</span>
+        </div>
+    </div>
+
+    <!-- Level Up Animation -->
+    <div id="levelUpOverlay" class="level-up-overlay hidden">
+        <div class="level-up-animation">
+            <div class="level-up-icon">⭐</div>
+            <h2 class="level-up-title">LEVEL UP!</h2>
+            <div class="level-up-numbers">
+                <span class="old-level">24</span>
+                <span class="arrow">→</span>
+                <span class="new-level">25</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loot Box Opening Animation -->
+    <div id="lootboxOverlay" class="lootbox-overlay hidden">
+        <div class="lootbox-animation">
+            <div class="lootbox-container">
+                <div class="lootbox-box" id="lootboxBox">
+                    <div class="lootbox-lid"></div>
+                    <div class="lootbox-body"></div>
+                </div>
+                <div class="lootbox-reward hidden" id="lootboxReward">
+                    <img src="" alt="Reward" id="lootboxRewardImage">
+                    <h3 id="lootboxRewardTitle"></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="debug-panel hidden">
+        <div class="debug-header">
+            <h3>Debug Information</h3>
+            <button id="debugClose">&times;</button>
+        </div>
+        <div class="debug-content">
+            <div class="debug-section">
+                <h4>Player Data</h4>
+                <pre id="debugPlayerData"></pre>
+            </div>
+            <div class="debug-section">
+                <h4>Mission Progress</h4>
+                <pre id="debugMissionData"></pre>
+            </div>
+            <div class="debug-section">
+                <h4>System Info</h4>
+                <pre id="debugSystemInfo"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>

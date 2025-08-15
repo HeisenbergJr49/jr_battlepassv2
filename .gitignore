@@ -1,0 +1,63 @@
+# 🚫 JR.DEV Battlepass - Git Ignore
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Log files
+*.log
+logs/
+
+# Database dumps
+*.sql.bak
+*.dump
+
+# Cache directories
+cache/
+temp/
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# Build artifacts
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output
+
+# Package-lock files
+package-lock.json
+yarn.lock
